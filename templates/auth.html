@@ -23,23 +23,33 @@
             border-radius: 0.5rem;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
         }
+        .error-message {
+            display: none;
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <main class="container">
         <div class="card">
             <h2 class="text-center mb-4">Авторизация</h2>
-            <form>
+            <form method="POST">
                 <div class="mb-3">
                     <label for="authCode" class="form-label">Введите 6-значную комбинацию</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        <input type="text" class="form-control" id="authCode" placeholder="******" pattern="\d{6}" required>
+                        <input type="text" class="form-control" id="authCode" name="authCode" placeholder="******" pattern="\d{6}" required>
                     </div>
                 </div>
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary">Войти</button>
                 </div>
+                {% if error %}
+                <div id="errorMessage" class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
             </form>
         </div>
     </main>
