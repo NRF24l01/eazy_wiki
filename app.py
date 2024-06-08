@@ -8,6 +8,7 @@ docs_path = "docs.json"
 users_path = "users.json"
 BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/static/md_editor")
 
+
 def get_user_type_by_code(code):
     with open(users_path, "r") as f:
         parsed_data = loads(f.read())
@@ -17,9 +18,15 @@ def get_user_type_by_code(code):
     return None  # Return None if the code is not found
 
 
+def check_user(ses):
+    code = ses.get("code", None)
+    if not code: return None
+    return get_user_type_by_code(code)
+
+
 @app.route('/')
 def index():  # put application's code here
-    if not session.get("code", None):
+    if not check_user(session):
         return render_template("index.html", auth=False)
     else:
         return render_template("index.html", auth=True)
@@ -27,7 +34,9 @@ def index():  # put application's code here
 
 @app.route('/auth', methods=["GET"])
 def send_auth():  # put application's code here
-    return render_template("auth.html", error=None)
+    if not check_user(session):
+        return render_template("auth.html", error=None)
+    else: return redirect("/")
 
 
 @app.route('/logout')
@@ -58,7 +67,7 @@ def create_page():
 
 @app.route('/editor.md/<path:filepath>', methods=['GET'])
 def get_file(filepath):
-    return redirect("/static/md_editor/"+filepath)
+    return redirect("/static/md_editor/" + filepath)
 
 
 if __name__ == '__main__':
