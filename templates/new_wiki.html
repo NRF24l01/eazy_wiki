@@ -6,7 +6,8 @@
     <title>RX-Wiki</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="editor.md/css/editormd.min.css"/>
+    <!-- Editor.md CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/editor.md/css/editormd.min.css"/>
     <style>
         .container {
             margin-top: 20px;
@@ -67,38 +68,67 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 {% if auth %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="new_page"><i class="bi bi-plus-lg"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i></a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="new_page"><i class="bi bi-plus-lg"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i></a>
+                </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="auth"><i class="bi bi-key"></i></a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="auth"><i class="bi bi-key"></i></a>
+                </li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 <main class="container">
-    <div id="editor"></div>
+    <div id="editor">
+        <textarea style="display:none;"></textarea>
+    </div>
+    <button id="submitBtn">Отправить</button>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="/static/md_editor/editormd.min.js"></script>
-<script type="text/javascript">
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Editor.md JS -->
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/prettify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/raphael.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/underscore.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/sequence-diagram.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/flowchart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/lib/jquery.flowchart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/editor.md/editormd.min.js"></script>
+<script>
+    var editor;
     $(function () {
-        var editor = editormd("editor", {
+        editor = editormd("editor", {
+            path: "https://cdn.jsdelivr.net/npm/editor.md/lib/",  // Autoload modules mode, codemirror, marked... dependents libs path
             // width: "90%",
             height: "640px",
             // markdown: "xxxx",     // dynamic set Markdown text
-            path: "editor.md/lib/",  // Autoload modules mode, codemirror, marked... dependents libs path
             emoji: true
         });
     });
+
+    $('#submitBtn').click(function () {
+        var markdownContent = editor.getMarkdown();
+        $.ajax({
+            url: '/path/to/your/api/endpoint',
+            type: 'POST',
+            data: JSON.stringify({content: markdownContent}),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+                alert('Успешно отправлено');
+            },
+            error: function (error) {
+                alert('Ошибка при отправке');
+            }
+        });
+    });
 </script>
-<script src="/static/md_editor/languages/en.js"></script>
 </body>
 </html>

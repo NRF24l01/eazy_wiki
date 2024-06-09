@@ -65,10 +65,5 @@ def create_page():
         return render_template("new_wiki.html", auth=True)
 
 
-@app.route('/editor.md/<path:filepath>', methods=['GET'])
-def get_file(filepath):
-    return redirect("/static/md_editor/" + filepath)
-
-
 if __name__ == '__main__':
     app.run(debug=True)
