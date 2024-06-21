@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, abort
+from flask import Flask, render_template, request, redirect, session, abort, jsonify
 from json import loads, dumps
 import os
 
@@ -22,6 +22,27 @@ def check_user(ses):
     code = ses.get("code", None)
     if not code: return None
     return get_user_type_by_code(code)
+
+
+
+def remove_leading_hashtags(text):
+  # Проверяем, начинается ли строка с '#'
+  if text.startswith('#'):
+    # Ищем первый символ, который не является '#'
+    i = 0
+    while i < len(text) and text[i] == '#':
+      i += 1
+    # Возвращаем строку без ведущих хештегов
+    return text[i:]
+  else:
+    # Если строка не начинается с '#', возвращаем ее без изменений
+    return text
+
+
+def procces_md(md):
+    header = md.split("/n")[0].split("")
+    header = remove_leading_hashtags(header)
+
 
 
 @app.route('/')
@@ -63,6 +84,18 @@ def create_page():
         return redirect("/auth")
     else:
         return render_template("new_wiki.html", auth=True)
+
+@app.route("/api/v1/send_md", methods=["POST"])
+def recive_md():
+    if not get_user_type_by_code(session.get("code", None)):
+        return jsonify({"state": False, "err": "please auth"})
+    else:
+        markdown = request.get_json()["md"]
+        print(markdown)
+        if markdown:
+            return jsonify({"state": True, "link": "/"})
+        else:
+            return jsonify({"state": False, "err": "Please enter markdown"})
 
 
 if __name__ == '__main__':
