@@ -1,21 +1,34 @@
 from flask import Flask, render_template, request, redirect, session, abort, jsonify
-from json import loads, dumps
+from json import loads, dumps, JSONDecodeError
 import os
+from flask_sqlalchemy import SQLAlchemy
+from models import User, Wiki
+from flask_migrate import Migrate
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
 app.secret_key = 'negrQWERTY123'
-docs_path = "docs.json"
-users_path = "users.json"
-BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/static/md_editor")
 
 
 def get_user_type_by_code(code):
-    with open(users_path, "r") as f:
-        parsed_data = loads(f.read())
-    for entry in parsed_data:
-        if entry['code'] == code:
-            return entry['type']
+    print(User.query.filter_by(key=code).first())
     return None  # Return None if the code is not found
+
+
+def article_edit():
+    json_content = ""
+    try:
+        with open("articles.json", "r", encoding="utf-8") as f:
+            json_content = loads(f.read())
+    except JSONDecodeError:
+        with open("articles.json", "w", encoding="utf-8") as f:
+            f.write("{}")
+        json_content = {}
 
 
 def check_user(ses):
@@ -102,6 +115,7 @@ def recive_md():
         markdown = request.get_json()["md"]
         print(markdown)
         if markdown:
+
             return jsonify({"state": True, "link": "/"})
         else:
             return jsonify({"state": False, "err": "Please enter markdown"})
@@ -110,6 +124,7 @@ def recive_md():
 @app.route("/mu")
 def mu():
     return render_template("modal_test.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

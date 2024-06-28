@@ -2,3 +2,5 @@
 .idea
 docs.json
 users.json
+instance
+migrations
