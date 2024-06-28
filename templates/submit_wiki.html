@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RX-Wiki</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .was-validated .form-control:invalid, .was-validated .form-control:invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">RX-Wiki</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if auth %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="new_page"><i class="bi bi-plus-lg"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="logout"><i class="bi bi-box-arrow-right"></i></a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="auth"><i class="bi bi-key"></i></a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-5">
+        <form id="submissionForm" novalidate>
+            <div class="mb-3">
+                <label for="title" class="form-label">Ввод заголовка</label>
+                <input type="text" class="form-control" id="title" placeholder="Введите заголовок" required>
+                <div class="invalid-feedback">Пожалуйста, введите заголовок.</div>
+            </div>
+            <div class="mb-3">
+                <label for="cover" class="form-label">Загрузка обложки</label>
+                <input class="form-control" type="file" id="cover" accept="image/*" required>
+                <div class="invalid-feedback" id="coverFeedback">Пожалуйста, загрузите обложку (максимум 8 МБ).</div>
+            </div>
+            <div class="mb-3">
+                <label for="text" class="form-label">Описание</label>
+                <textarea class="form-control" id="text" rows="3" placeholder="Введите описание" required></textarea>
+                <div class="invalid-feedback">Пожалуйста, введите описание.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Подтверждение</button>
+        </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('submissionForm').addEventListener('submit', function (event) {
+            const form = event.target;
+            const coverInput = document.getElementById('cover');
+            const coverFeedback = document.getElementById('coverFeedback');
+
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Check file size
+            if (coverInput.files[0].size > 8 * 1024 * 1024) { // 8 MB
+                coverFeedback.textContent = 'Размер файла превышает 8 МБ.';
+                coverInput.setCustomValidity('Размер файла превышает 8 МБ.');
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                coverFeedback.textContent = 'Пожалуйста, загрузите обложку (максимум 8 МБ).';
+                coverInput.setCustomValidity('');
+            }
+
+            form.classList.add('was-validated');
+        }, false);
+    </script>
+</body>
+</html>

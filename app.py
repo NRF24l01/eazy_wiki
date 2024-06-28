@@ -24,25 +24,24 @@ def check_user(ses):
     return get_user_type_by_code(code)
 
 
-
 def remove_leading_hashtags(text):
-  # Проверяем, начинается ли строка с '#'
-  if text.startswith('#'):
-    # Ищем первый символ, который не является '#'
-    i = 0
-    while i < len(text) and text[i] == '#':
-      i += 1
-    # Возвращаем строку без ведущих хештегов
-    return text[i:]
-  else:
-    # Если строка не начинается с '#', возвращаем ее без изменений
-    return text
+    # Проверяем, начинается ли строка с '#'
+    if text.startswith('#'):
+        # Ищем первый символ, который не является '#'
+        i = 0
+        while i < len(text) and text[i] == '#':
+            i += 1
+        # Возвращаем строку без ведущих хештегов
+        return text[i:]
+    else:
+        # Если строка не начинается с '#', возвращаем ее без изменений
+        return text
 
 
-def procces_md(md):
+def get_head(md):
     header = md.split("/n")[0].split("")
     header = remove_leading_hashtags(header)
-
+    return header
 
 
 @app.route('/')
@@ -57,7 +56,8 @@ def index():  # put application's code here
 def send_auth():  # put application's code here
     if not check_user(session):
         return render_template("auth.html", error=None)
-    else: return redirect("/")
+    else:
+        return redirect("/")
 
 
 @app.route('/logout')
@@ -83,7 +83,16 @@ def create_page():
     if not session.get("code", None):
         return redirect("/auth")
     else:
-        return render_template("new_wiki.html", auth=True)
+        return render_template("edit_wiki.html", auth=True)
+
+
+@app.route("/subm_page", methods=["POST"])
+def subm_page():
+    if not session.get("code", None):
+        return redirect("/auth")
+    else:
+        return render_template("submit_wiki.html", auth=True)
+
 
 @app.route("/api/v1/send_md", methods=["POST"])
 def recive_md():
@@ -97,6 +106,10 @@ def recive_md():
         else:
             return jsonify({"state": False, "err": "Please enter markdown"})
 
+
+@app.route("/mu")
+def mu():
+    return render_template("modal_test.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
