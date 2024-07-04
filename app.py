@@ -2,15 +2,16 @@ from flask import Flask, render_template, request, redirect, session, abort, jso
 from json import loads, dumps, JSONDecodeError
 import os
 from flask_sqlalchemy import SQLAlchemy
-from models import User, Wiki
 from flask_migrate import Migrate
+from models import create_model
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+User, Wiki = create_model(db)
+migrate = Migrate(app, db, compare_type=True)
 
 app.secret_key = 'negrQWERTY123'
 
