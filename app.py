@@ -17,18 +17,8 @@ User, Wiki = create_model(db)
 migrate = Migrate(app, db, compare_type=True)
 
 app.secret_key = 'negrQWERTY123'
-makedirs("instance/files/images", exist_ok=True)
-makedirs("instance/files/wikis", exist_ok=True)
-
-def article_edit():
-    json_content = ""
-    try:
-        with open("articles.json", "r", encoding="utf-8") as f:
-            json_content = loads(f.read())
-    except JSONDecodeError:
-        with open("articles.json", "w", encoding="utf-8") as f:
-            f.write("{}")
-        json_content = {}
+makedirs("static/files/images", exist_ok=True)
+makedirs("static/files/wikis", exist_ok=True)
 
 
 def check_user_by_code(code):
@@ -49,32 +39,35 @@ def can_write(ses):
     return False
 
 
-def remove_leading_hashtags(text):
-    # Проверяем, начинается ли строка с '#'
-    if text.startswith('#'):
-        # Ищем первый символ, который не является '#'
-        i = 0
-        while i < len(text) and text[i] == '#':
-            i += 1
-        # Возвращаем строку без ведущих хештегов
-        return text[i:]
-    else:
-        # Если строка не начинается с '#', возвращаем ее без изменений
-        return text
-
-
-def get_head(md):
-    header = md.split("/n")[0].split("")
-    header = remove_leading_hashtags(header)
-    return header
+def get_articles(ses):
+    code = ses.get("code", None)
+    if not Wiki.query.all(): return None
+    print(Wiki.query.all())
+    for page in Wiki.query.all():
+        pass
 
 
 @app.route('/')
 def index():  # put application's code here
+    get_articles(session)
     if not check_user(session):
         return render_template("index.html", auth=False)
     else:
         return render_template("index.html", auth=True)
+
+
+@app.route('/read/<int:pgid>')
+def read_page(pgid):
+    print(pgid)
+    wika = Wiki.query.filter_by(id=pgid).first()
+    if not wika: abort(404)
+
+    with open(wika.path_to_md, "r", encoding="UTF-8") as f:
+        md = f.read()
+
+    print(wika.path_to_logo, wika.title, wika.desc, md)
+
+    return render_template("read_wiki.html", img_path=wika.path_to_logo, title=wika.title, desc=wika.desc, md=md)
 
 
 @app.route('/auth', methods=["GET"])
@@ -142,10 +135,10 @@ def save_docs():
         filename = secure_filename(uploaded_file.filename)
         wiki_title, desc = request.form.get("title"), request.form.get("desc")
 
-        with open(path.join("instance/files/wikis", wiki_title+".md"), "w", encoding="UTF-8") as f: f.write(session.get("md", ""))
-        uploaded_file.save(path.join("instance/files/images", filename))
+        with open(path.join("static/files/wikis", wiki_title + ".md"), "w", encoding="UTF-8") as f: f.write(session.get("md", ""))
+        uploaded_file.save(path.join("static/files/images", filename))
 
-        new_wiki = Wiki(title=wiki_title, desc=desc, path_to_md=path.join("instance/files/wikis", wiki_title+".md"), path_to_logo=path.join("instance/files/images", filename))
+        new_wiki = Wiki(title=wiki_title, desc=desc, path_to_md=path.join("static/files/wikis", wiki_title + ".md"), path_to_logo=path.join("instance/files/images", filename))
         db.session.add(new_wiki)
         db.session.commit()
 
